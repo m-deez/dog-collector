@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.views import View # <- View class to handle requests
 from django.http import HttpResponse # <- a class to handle sending a type of response
 from django.views.generic.base import TemplateView
+from django.views.generic.edit import CreateView
 from .models import Dog
 
 
@@ -39,3 +40,9 @@ class DogList(TemplateView):
             context["dogs"] = Dog.objects.all()
             context["header"] = "Trending Doggos"
         return context
+
+class DogCreate(CreateView):
+    model = Dog
+    fields = ['name', 'breed', 'img', 'bio', 'verified_doggo']
+    template_name = "dog_create.html"
+    success_url = "/dogs/"
