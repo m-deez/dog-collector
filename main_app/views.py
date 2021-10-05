@@ -2,8 +2,9 @@ from django.shortcuts import render
 from django.views import View # <- View class to handle requests
 from django.http import HttpResponse # <- a class to handle sending a type of response
 from django.views.generic.base import TemplateView
-from django.views.generic.edit import CreateView, UpdateView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import DetailView
+from django.urls import reverse
 from .models import Dog
 
 
@@ -46,7 +47,8 @@ class DogCreate(CreateView):
     model = Dog
     fields = ['name', 'breed', 'img', 'bio', 'verified_doggo']
     template_name = "dog_create.html"
-    success_url = "/dogs/"
+    def get_success_url(self):
+        return reverse('dog_detail', kwargs={'pk': self.object.pk})
 
 class DogDetail(DetailView):
     model = Dog
@@ -56,4 +58,10 @@ class DogUpdate(UpdateView):
     model = Dog
     fields = ['name', 'breed', 'img', 'bio', 'verified_doggo']
     template_name = "dog_update.html"
+    def get_success_url(self):
+        return reverse('dog_detail', kwargs={'pk': self.object.pk})
+
+class DogDelete(DeleteView):
+    model = Dog
+    template_name = "dog_delete_confirmation.html"
     success_url = "/dogs/"
