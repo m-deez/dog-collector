@@ -14,3 +14,13 @@ class Dog(models.Model):
 
     class Meta:
         ordering = ['name']
+
+class Collar(models.Model):
+
+    brand = models.CharField(max_length=150)
+    length = models.IntegerField(default=0)
+    color = models.CharField(max_length=100)
+    dog = models.ForeignKey(Dog, on_delete=models.CASCADE, related_name="collars")
+
+    def __str__(self):
+        return self.brand
