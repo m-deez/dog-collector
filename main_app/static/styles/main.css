@@ -83,13 +83,13 @@ img {
   flex-direction: column;
 }
 
-/* .collar {
+.collar {
   width: 100%;
   padding: 10px;
   display: grid;
-  grid-template-columns: 0.1fr 3fr 1fr;
+  grid-template-columns: 0.1fr 0.5fr 1fr 1fr;
   border-radius: 5px;
-} */
+}
 
 .collar:hover {
   background-color: hsla(0, 0%, 100%, 0.1);
