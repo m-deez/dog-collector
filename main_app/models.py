@@ -24,3 +24,11 @@ class Collar(models.Model):
 
     def __str__(self):
         return self.brand
+
+class Walker(models.Model):
+
+    name = models.CharField(max_length=150)
+    dog = models.ManyToManyField(Dog)
+
+    def __str__(self):
+        return self.name
