@@ -1,4 +1,36 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Welcome to my "Dog Collector" app! Please checkout all the dogs I have "collected". (Really it's just pictures of my dog Lilly)</h1>
+
+<div class="home__walkers">
+    {% for walker in walkers %}
+  
+        <div class="walker mb-5">
+          <h3 class="title is-3 has-text-success">{{walker.name}}</h3>
+          <hr />
+  
+          {% for dog in walker.dog.all %}
+  
+              <div class="collar">
+                <span>{{forloop.counter}}</span>
+                <span><b>{{dog.name}}</b></span>
+                <span>{{dog.breed}}</span>
+                <span>
+                      <a
+                        href="{% url 'walker_dog_assoc' walker.pk dog.pk %}?assoc=remove"
+                        class="button is-danger is-outlined"
+                      >
+                        <span class="icon is-small">
+                          <i class="fas fa-times"></i>
+                        </span>
+                      </a>
+                </span>
+              </div>
+  
+          {% endfor %}
+        </div>
+  
+    {% endfor %}
+  </div>
+
 {% endblock %}
