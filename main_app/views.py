@@ -6,7 +6,12 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.views.generic import DetailView
 from django.urls import reverse
 from .models import Dog, Collar, Walker
+from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
 
+# Main Classes ====================================================
 
 class Home(TemplateView):
     template_name = "home.html"
@@ -19,42 +24,54 @@ class Home(TemplateView):
 class About(TemplateView):
     template_name = "about.html"
 
-# class Dog:
-#     def __init__(self, name, breed, image, bio):
-#         self.name = name
-#         self.breed = breed
-#         self.image = image
-#         self.bio = bio
+class Signup(View):
 
-dogs = [
-    Dog("Lilly", "Beagle", "https://i.imgur.com/EuYvkb3.jpeg", "Lilly is the bestest gurl ever."),
-    Dog("Lilly2", "Also Beagle", "https://i.imgur.com/NgFZl5a.jpeg", "Lilly2 is a test."),
-    Dog("Lilly3", "Weiner doggo", "https://i.imgur.com/79RWIBH.jpeg", "Lilly3 is a doofus.")
-]
+    def get(self, request):
+        form = UserCreationForm()
+        context = {"form": form}
+        return render(request, "registration/signup.html", context)
 
+    def post(self, request):
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect("artist_list")
+        else:
+            context = {"form": form}
+            return render(request, "registration/signup.html", context)
+
+# Dog Classes ======================================================
+
+@method_decorator(login_required, name='dispatch')
 class DogList(TemplateView):
     template_name = 'dog_list.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         name = self.request.GET.get("name")
-        # If a query exists we will filter by name 
         if name != None:
-            # .filter is the sql WHERE statement and name__icontains is doing a search for any name that contains the query param
-            context["dogs"] = Dog.objects.filter(name__icontains=name)
+            context["dogs"] = Dog.objects.filter(name__icontains=name, user=self.request.user)
             context["header"] = f"Searching for {name}"
         else:
-            context["dogs"] = Dog.objects.all()
+            context["dogs"] = Dog.objects.filter(user=self.request.user)
             context["header"] = "Trending Doggos"
         return context
 
+@method_decorator(login_required, name='dispatch')
 class DogCreate(CreateView):
     model = Dog
     fields = ['name', 'breed', 'img', 'bio', 'verified_doggo']
     template_name = "dog_create.html"
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super(DogCreate, self).form_valid(form)
+
     def get_success_url(self):
+        print(self.kwargs)
         return reverse('dog_detail', kwargs={'pk': self.object.pk})
 
+@method_decorator(login_required, name='dispatch')
 class DogDetail(DetailView):
     model = Dog
     template_name = "dog_detail.html"
@@ -64,6 +81,7 @@ class DogDetail(DetailView):
         context["walkers"] = Walker.objects.all()
         return context
 
+@method_decorator(login_required, name='dispatch')
 class DogUpdate(UpdateView):
     model = Dog
     fields = ['name', 'breed', 'img', 'bio', 'verified_doggo']
@@ -71,11 +89,13 @@ class DogUpdate(UpdateView):
     def get_success_url(self):
         return reverse('dog_detail', kwargs={'pk': self.object.pk})
 
+@method_decorator(login_required, name='dispatch')
 class DogDelete(DeleteView):
     model = Dog
     template_name = "dog_delete_confirmation.html"
     success_url = "/dogs/"
 
+@method_decorator(login_required, name='dispatch')
 class CollarCreate(View):
 
     def post(self, request, pk):
@@ -86,6 +106,7 @@ class CollarCreate(View):
         Collar.objects.create(brand=brand, length=length, color=color, dog=dog)
         return redirect('dog_detail', pk=pk)
 
+@method_decorator(login_required, name='dispatch')
 class WalkerDogAssoc(View):
 
     def get(self, request, pk, dog_pk):
